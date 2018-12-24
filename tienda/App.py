@@ -39,14 +39,18 @@ def add_product():
         return redirect(url_for('Index'))
     
 
-@app.route('/edit')
-def edit_product():
-    return 'añadir producto'
+@app.route('/edit/<id>')
+def get_product(id):    
+    cur = mysql.connection.cursor()
+    cur.execute ('SELECT * FROM productos WHERE id = %s',(id))
+    data = cur.fetchall()
+    print(data)
+    return 'recibido' #render_template('editar-producto.html', product = data[0])
 
 @app.route('/delete/<string:id>')
 def delete_product(id):
     cur = mysql.connection.cursor()
-    cur.execute('DELETE FROM productos WHERE id={0}'.format(id))
+    cur.execute('DELETE FROM productos WHERE id = {0}'.format(id))
     mysql.connection.commit()
     flash('El producto se elimino correctamente.')
     return redirect(url_for('Index'))
