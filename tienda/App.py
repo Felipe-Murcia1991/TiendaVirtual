@@ -1,5 +1,6 @@
 from flask  import Flask,render_template, request,redirect, url_for,flash
 from flask_mysqldb import MySQL
+import logging
 
 
 
@@ -40,12 +41,32 @@ def add_product():
     
 
 @app.route('/edit/<id>')
-def get_product(id):    
+def get_product(id):
+    logging.debug("Eston debug message")          
     cur = mysql.connection.cursor()
-    cur.execute ('SELECT * FROM productos WHERE id = %s',(id))
+    cur.execute ('SELECT * FROM productos WHERE id = (id)')
     data = cur.fetchall()
     print(data)
-    return 'recibido' #render_template('editar-producto.html', product = data[0])
+    return render_template('editar-producto.html', producto = data[0])
+
+@app.route('/update/<id>', methods=['POST'])
+def update_product(id):
+    if request.method == 'POST':
+        Producto = request.form['Producto'] 
+        Unidades = request.form['Unidades'] 
+        Precio = request.form['Precio']
+        cur=mysql.connection.cursor()
+        cur.execute("""
+        UPDATE productos
+        set Producto=%s,
+            Unidades=%s,
+            Precio=%s
+        WHERE id=%s
+        """,(Producto,Unidades,Precio,id))
+        mysql.connection.commit()
+        flash('El inventario se actualizo correctamente')
+        return redirect(url_for('Index'))
+    
 
 @app.route('/delete/<string:id>')
 def delete_product(id):
